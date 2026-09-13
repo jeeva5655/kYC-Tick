@@ -15,7 +15,10 @@ const staticFiles = new Map([
   ["/landing.css", { file: "landing.css", type: "text/css; charset=utf-8" }],
   ["/landing.js", { file: "landing.js", type: "text/javascript; charset=utf-8" }],
   ["/styles.css", { file: "styles.css", type: "text/css; charset=utf-8" }],
-  ["/app.js", { file: "app.js", type: "text/javascript; charset=utf-8" }]
+  ["/app.js", { file: "app.js", type: "text/javascript; charset=utf-8" }],
+  ["/manifest.json", { file: "manifest.json", type: "application/manifest+json; charset=utf-8" }],
+  ["/service-worker.js", { file: "service-worker.js", type: "text/javascript; charset=utf-8" }],
+  ["/icon-512.jpg", { file: "icon-512.jpg", type: "image/jpeg" }]
 ]);
 
 function addSafetyHeaders(response) {
