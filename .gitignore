@@ -1,0 +1,10 @@
+node_modules/
+.venv/
+.uv-cache/
+.uv-python/
+__pycache__/
+*.pyc
+frames_backup/
+vision_service/.paddlex-cache/
+*.pt
+*.pdiparams

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A local-only synthetic document-integrity triage demo." />
+    <title>Document Integrity Demo</title>
+    <link rel="stylesheet" href="/styles.css?v=4" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="site-header">
+        <div>
+          <p class="eyebrow">AI DOCUMENT SCREENING</p>
+          <h1>Real-world identity<br /><span>verification dashboard</span></h1>
+        </div>
+        <p class="header-note">Deep learning inference running locally<br />No uploads to cloud · Privacy first</p>
+      </header>
+
+      <section class="safety-note" aria-label="Safety boundary">
+        <span aria-hidden="true">✦</span>
+        <p><strong>Privacy First:</strong> This system processes images in memory only; they are not stored or shared with third parties. It runs local models (PassportEye, ManTraNet, PaddleOCR, DeepFace) to provide comprehensive signal intelligence.</p>
+      </section>
+
+      <nav class="tab-nav">
+        <button class="tab-button active" data-target="screeningTab">Screening</button>
+        <button class="tab-button" data-target="analyticsTab">Supervisor Analytics</button>
+      </nav>
+
+      <div id="screeningTab" class="tab-content active">
+        <section class="workspace">
+        <form class="input-panel" id="screeningForm">
+          <div class="section-heading">
+            <p class="eyebrow">STEP 1</p>
+            <h2>Upload Assets</h2>
+          </div>
+
+          <div class="drop-zone" id="docDropZone">
+            <label for="documentImage" class="upload-label">
+              <span class="upload-icon">📄</span>
+              <span class="upload-title">Drop passport image here</span>
+              <span class="field-hint">or click to browse (JPEG, PNG)</span>
+              <input type="file" id="documentImage" name="documentImage" accept="image/jpeg, image/png, image/webp" class="file-input" required />
+            </label>
+            <div id="docPreview" class="preview-container" hidden></div>
+          </div>
+
+          <div class="drop-zone" id="docBackDropZone">
+            <label for="documentBackImage" class="upload-label">
+              <span class="upload-icon">📄</span>
+              <span class="upload-title">Drop document BACK here (Optional)</span>
+              <span class="field-hint">For QR codes & addresses (JPEG, PNG)</span>
+              <input type="file" id="documentBackImage" name="documentBackImage" accept="image/jpeg, image/png, image/webp" class="file-input" />
+            </label>
+            <div id="docBackPreview" class="preview-container" hidden></div>
+          </div>
+
+          <div class="drop-zone" id="liveDropZone">
+            <label for="liveImage" class="upload-label">
+              <span class="upload-icon">🤳</span>
+              <span class="upload-title">Drop live selfie here</span>
+              <span class="field-hint">or click to browse (JPEG, PNG)</span>
+              <input type="file" id="liveImage" name="liveImage" accept="image/jpeg, image/png, image/webp" class="file-input" />
+            </label>
+            <div id="livePreview" class="preview-container" hidden></div>
+          </div>
+
+          <div class="document-type-selector" style="margin-top: 1rem; margin-bottom: 1rem;">
+            <label for="manualDocumentType" style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: var(--text-muted);">Document Type (Optional override):</label>
+            <!-- Add a class instead of inline styles for cleaner fix of option background -->
+            <select id="manualDocumentType" class="document-select">
+              <option value="auto">Auto-Detect (AI Classification)</option>
+              <option value="passport">Passport</option>
+              <option value="aadhaar">Aadhaar Card</option>
+              <option value="pan">PAN Card</option>
+              <option value="voter_id">Voter ID (EPIC)</option>
+              <option value="dl">Driving Licence</option>
+            </select>
+          </div>
+
+          <button type="submit" class="primary-button" id="submitBtn" disabled>Run AI Screening <span aria-hidden="true">→</span></button>
+          
+          <div id="progressIndicator" class="progress-indicator" hidden>
+            <div class="spinner"></div>
+            <span id="progressText">Analyzing document...</span>
+          </div>
+        </form>
+
+        <section class="result-panel" aria-live="polite" aria-labelledby="result-heading">
+          <div class="section-heading result-heading">
+            <div>
+              <p class="eyebrow">STEP 2</p>
+              <h2 id="result-heading">Intelligence Report</h2>
+            </div>
+            <div class="result-actions">
+              <span id="triageBadge" class="triage-badge neutral">Waiting for input</span>
+              <button id="downloadPdfBtn" class="secondary-button" hidden>Download PDF</button>
+            </div>
+          </div>
+          
+          <div id="emptyResult" class="empty-state">
+            <span aria-hidden="true">⌁</span>
+            <p>Upload a document to begin the automated forensics and data extraction pipeline.</p>
+          </div>
+          
+          <div id="resultContent" hidden>
+            <p id="triageDescription" class="triage-description"></p>
+            <div class="axes-grid" id="axesGrid"></div>
+            <div class="report-columns">
+              <section>
+                <h3>Extracted Data</h3>
+                <dl class="field-list" id="fieldList"></dl>
+              </section>
+              <section>
+                <h3>Forensic Checks</h3>
+                <ul class="evidence-list" id="checkList"></ul>
+              </section>
+            </div>
+            <section class="audit-section">
+              <h3>Non-identifying audit digest</h3>
+              <code id="auditDigest"></code>
+            </section>
+            <ul class="limitations" id="limitationsList"></ul>
+          </div>
+        </section>
+      </section>
+      </div> <!-- End Screening Tab -->
+
+      <div id="analyticsTab" class="tab-content" hidden>
+        <section class="analytics-dashboard">
+          <div class="analytics-header">
+            <h2>Command Center Overview</h2>
+            <button id="refreshAnalyticsBtn" class="secondary-button">Refresh Data</button>
+          </div>
+          
+          <div class="stats-grid">
+            <div class="stat-card">
+              <h3>Total Screenings</h3>
+              <p class="stat-value" id="statTotal">0</p>
+            </div>
+            <div class="stat-card">
+              <h3>Low Risk (Clear)</h3>
+              <p class="stat-value green" id="statGreen">0</p>
+            </div>
+            <div class="stat-card">
+              <h3>Medium Risk (Review)</h3>
+              <p class="stat-value amber" id="statAmber">0</p>
+            </div>
+            <div class="stat-card">
+              <h3>High Risk (Stop)</h3>
+              <p class="stat-value red" id="statRed">0</p>
+            </div>
+          </div>
+
+          <div class="recent-activity">
+            <h3>Recent Screenings</h3>
+            <table class="activity-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Document Type</th>
+                  <th>Verdict</th>
+                  <th>Hash</th>
+                </tr>
+              </thead>
+              <tbody id="activityTableBody">
+                <tr><td colspan="4">No data yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div> <!-- End Analytics Tab -->
+
+    </main>
+    <script type="module" src="/app.js?v=5"></script>
+  </body>
+</html>

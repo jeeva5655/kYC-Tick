@@ -1,0 +1,17 @@
+{
+  "name": "synthetic-document-integrity-demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A local-only, synthetic-data demo for explainable document-integrity triage.",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test screening.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "sharp": "^0.35.4"
+  }
+}
