@@ -186,7 +186,13 @@ elements.form.addEventListener("submit", async (event) => {
     
     let backendUrl = document.getElementById("backendUrlInput").value.trim();
     if (backendUrl.endsWith("/")) backendUrl = backendUrl.slice(0, -1);
-    const analyzeRes = await fetch(`${backendUrl}/api/v1/analyze-all`, { method: "POST", body: docData });
+    const analyzeRes = await fetch(`${backendUrl}/api/v1/analyze-all`, {
+      method: "POST",
+      body: docData,
+      headers: {
+        'bypass-tunnel-reminder': 'true'
+      }
+    });
     if (!analyzeRes.ok) {
         throw new Error("Failed to communicate with vision service");
     }
