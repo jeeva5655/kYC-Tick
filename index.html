@@ -6,7 +6,10 @@
     <meta name="description" content="A local-only synthetic document-integrity triage demo." />
     <title>Document Integrity Demo - Getting Started</title>
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#0070f3" />
+    <meta name="theme-color" content="#1e293b" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/landing.css" />
   </head>
   <body>
@@ -38,17 +41,6 @@
       </div>
     </div>
 
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js').then(registration => {
-            console.log('ServiceWorker registration successful with scope: ', registration.scope);
-          }).catch(err => {
-            console.log('ServiceWorker registration failed: ', err);
-          });
-        });
-      }
-    </script>
     <script src="/landing.js"></script>
   </body>
 </html>

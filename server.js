@@ -21,9 +21,11 @@ const staticFiles = new Map([
   ["/icon-512.jpg", { file: "icon-512.jpg", type: "image/jpeg" }]
 ]);
 
+const framePathPattern = /^\/(frames|frames_4k)\/ezgif-frame-\d{3}\.jpg$/;
+
 function addSafetyHeaders(response) {
   response.setHeader("Cache-Control", "no-store");
-  response.setHeader("Content-Security-Policy", "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://127.0.0.1:8001; img-src 'self' data: blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'");
+  response.setHeader("Content-Security-Policy", "default-src 'self'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self' http://127.0.0.1:8001; img-src 'self' data: blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'");
   response.setHeader("Referrer-Policy", "no-referrer");
   response.setHeader("X-Content-Type-Options", "nosniff");
 }
@@ -65,9 +67,10 @@ const server = createServer(async (request, response) => {
   const requestUrl = new URL(request.url || "/", "http://127.0.0.1");
 
   try {
-    if (request.method === "GET" && requestUrl.pathname.startsWith("/frames/")) {
+    if (request.method === "GET" && framePathPattern.test(requestUrl.pathname)) {
       try {
-        const framePath = path.join(rootDirectory, requestUrl.pathname);
+        const [directory, filename] = requestUrl.pathname.slice(1).split("/");
+        const framePath = path.join(rootDirectory, directory, filename);
         const content = await readFile(framePath);
         addSafetyHeaders(response);
         response.writeHead(200, { "Content-Type": "image/jpeg" });
@@ -120,6 +123,14 @@ const screeningHistory = [];
       const content = await readFile(path.join(rootDirectory, asset.file));
       addSafetyHeaders(response);
       response.writeHead(200, { "Content-Type": asset.type });
+      return response.end(content);
+    }
+
+    if (request.method === "GET" && framePathPattern.test(requestUrl.pathname)) {
+      const [directory, filename] = requestUrl.pathname.slice(1).split("/");
+      const content = await readFile(path.join(rootDirectory, directory, filename));
+      addSafetyHeaders(response);
+      response.writeHead(200, { "Content-Type": "image/jpeg" });
       return response.end(content);
     }
 

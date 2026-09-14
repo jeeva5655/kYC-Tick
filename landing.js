@@ -1,4 +1,10 @@
 // landing.js
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/service-worker.js").catch(() => {});
+    });
+}
+
 const html = document.documentElement;
 const canvas = document.getElementById("hero-lightpass");
 const context = canvas.getContext("2d");
@@ -104,7 +110,7 @@ for (let i = 1; i <= frameCount; i++) {
 
 // Ensure the loading overlay hides eventually even if not all first 50 frames load fast
 setTimeout(() => {
-    if (!initialized && loadedCount > 10) {
+    if (!initialized) {
         initialized = true;
         loadingOverlay.style.opacity = '0';
         setTimeout(() => {
@@ -146,8 +152,8 @@ window.addEventListener('scroll', () => {
       step3.classList.remove('visible');
   }
 
-  // Scene 4 (Scroll 85%+)
-  if (scrollFraction > 0.85) {
+    // Scene 4 (Scroll 85%+)
+    if (scrollFraction > 0.85) {
       heroContent.classList.add('visible');
   } else {
       heroContent.classList.remove('visible');

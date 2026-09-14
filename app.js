@@ -54,24 +54,16 @@ function renderResult(result) {
   elements.emptyResult.hidden = true;
   elements.resultContent.hidden = false;
   if (elements.downloadPdfBtn) elements.downloadPdfBtn.hidden = false;
-  elements.triageBadge.className = `triage-badge ${visualStatus(result.triage)}`;
+  elements.triageBadge.className = `badge rounded-pill triage-badge ${visualStatus(result.triage)}`;
   
   if (result.triage === "NO_HIGH_RISK_SIGNAL_DETECTED") {
     elements.triageBadge.textContent = "REAL (AUTHENTIC)";
-    elements.triageBadge.style.backgroundColor = "#00c853";
-    elements.triageBadge.style.color = "white";
   } else if (result.triage === "MANUAL_REVIEW") {
     elements.triageBadge.textContent = "FAKE (FORGERY DETECTED)";
-    elements.triageBadge.style.backgroundColor = "#ff3d00";
-    elements.triageBadge.style.color = "white";
   } else if (result.triage === "RETAKE_IMAGE") {
     elements.triageBadge.textContent = "UNKNOWN (RETAKE)";
-    elements.triageBadge.style.backgroundColor = "#ff9100";
-    elements.triageBadge.style.color = "white";
   } else {
     elements.triageBadge.textContent = statusLabel(result.triage);
-    elements.triageBadge.style.backgroundColor = "";
-    elements.triageBadge.style.color = "";
   }
   
   elements.triageDescription.textContent = triageCopy(result);
@@ -143,10 +135,8 @@ function handleFileSelect(inputElement, previewElement) {
       
       const label = inputElement.closest('.upload-label');
       if (label) {
-        const icon = label.querySelector('.upload-icon');
         const title = label.querySelector('.upload-title');
         const hint = label.querySelector('.field-hint');
-        if (icon) icon.style.display = 'none';
         if (title) title.style.display = 'none';
         if (hint) hint.style.display = 'none';
       }

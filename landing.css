@@ -177,3 +177,30 @@ canvas#hero-lightpass {
   top: 15%;
   right: 5%;
 }
+
+/* KYC Tick landing design system */
+:root {
+  --bg-color: #f8fafc;
+  --text-color: #1e293b;
+  --accent-color: #344b70;
+  --font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+}
+
+body, html { background: linear-gradient(135deg, #f8fafc 0%, #edf3fa 100%); color: var(--text-color); font-family: var(--font-family); }
+#loading-overlay { background: #f8fafc; color: #64748b; }
+.spinner { border-color: #e2e8f0; border-left-color: #344b70; }
+.sticky-container { padding: 7vw 6vw; align-items: flex-end; }
+.hero-content { max-width: 34rem; }
+.hero-content h1 { color: #1e293b; font-family: var(--font-family); font-size: clamp(2.4rem, 5vw, 4rem); font-weight: 700; letter-spacing: -.045em; text-shadow: none; }
+.hero-content p { color: #64748b; font-size: 1.05rem; font-weight: 400; text-shadow: none; }
+.primary-button { border-radius: .35rem; background: #1e293b; box-shadow: 0 .35rem .8rem rgba(15,23,42,.16); font-weight: 700; }
+.primary-button:hover { background: #0f172a; }
+.scroll-step { max-width: 350px; padding: 1.25rem 1.4rem; border: 1px solid rgba(226,232,240,.9); border-radius: .5rem; background: rgba(255,255,255,.88); box-shadow: 0 .4rem 1.2rem rgba(15,23,42,.07), 0 .1rem .2rem rgba(15,23,42,.03); backdrop-filter: blur(8px); }
+.scroll-step h2 { color: #1e293b; font-family: var(--font-family); font-size: 1.15rem; font-weight: 600; }
+.scroll-step p { color: #64748b; font-family: var(--font-family); font-size: .92rem; }
+
+@media (max-width: 640px) {
+  .sticky-container { padding: 8vw 6vw; }
+  .hero-content h1 { font-size: 2.5rem; }
+  .scroll-step { max-width: 78%; padding: 1rem; }
+}
