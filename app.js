@@ -194,7 +194,9 @@ elements.form.addEventListener("submit", async (event) => {
     
     elements.progressText.textContent = "Running unified visual analysis (OCR, Forensics, Face)...";
     
-    const analyzeRes = await fetch("http://127.0.0.1:8001/api/v1/analyze-all", { method: "POST", body: docData });
+    let backendUrl = document.getElementById("backendUrlInput").value.trim();
+    if (backendUrl.endsWith("/")) backendUrl = backendUrl.slice(0, -1);
+    const analyzeRes = await fetch(`${backendUrl}/api/v1/analyze-all`, { method: "POST", body: docData });
     if (!analyzeRes.ok) {
         throw new Error("Failed to communicate with vision service");
     }
@@ -328,4 +330,15 @@ async function loadAnalytics() {
 
 if (elements.refreshAnalyticsBtn) {
   elements.refreshAnalyticsBtn.addEventListener('click', loadAnalytics);
+}
+
+const urlInput = document.getElementById("backendUrlInput");
+if (urlInput) {
+    const savedUrl = localStorage.getItem("backendApiUrl");
+    if (savedUrl) {
+        urlInput.value = savedUrl;
+    }
+    urlInput.addEventListener("input", (e) => {
+        localStorage.setItem("backendApiUrl", e.target.value.trim());
+    });
 }
