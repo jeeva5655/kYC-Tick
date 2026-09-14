@@ -20,6 +20,16 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // Only intercept GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+  
+  // Do not intercept external API calls
+  if (event.request.url.includes('/api/')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
