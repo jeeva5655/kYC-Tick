@@ -37,6 +37,13 @@ def process_full_ocr(doc_bytes: bytes) -> dict:
     if img is None:
         raise HTTPException(status_code=400, detail="Invalid image file.")
 
+    # Downscale extremely large images to prevent OOM errors during OCR
+    max_dim = 1200
+    h, w = img.shape[:2]
+    if max(h, w) > max_dim:
+        scale = max_dim / max(h, w)
+        img = cv2.resize(img, (int(w * scale), int(h * scale)))
+
     try:
         ocr = get_ocr()
         # RapidOCR returns a tuple: (result, elapse)

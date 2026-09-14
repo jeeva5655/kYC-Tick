@@ -492,6 +492,13 @@ def detect_ai_logic(image_bytes: bytes) -> dict:
         if img_cv is None:
             raise HTTPException(status_code=400, detail="Invalid image file.")
 
+        # Downscale extremely large images to prevent OOM errors in DCT/FFT analysis
+        max_dim = 1200
+        h, w = img_cv.shape[:2]
+        if max(h, w) > max_dim:
+            scale = max_dim / max(h, w)
+            img_cv = cv2.resize(img_cv, (int(w * scale), int(h * scale)))
+
         # Decode for PIL (EXIF reading)
         img_pil = Image.open(io.BytesIO(image_bytes))
 
