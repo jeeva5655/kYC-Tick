@@ -7,6 +7,7 @@ test-fixture validation and short-lived in-memory processing.
 
 from importlib.metadata import PackageNotFoundError, version
 import io
+import os
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,9 +20,17 @@ app = FastAPI(
 )
 
 # Allow requests from the Node.js frontend
+allowed_origins = ["http://127.0.0.1:3000", "http://localhost:3000"]
+allowed_origins.extend(
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", "").split(",")
+    if origin.strip()
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:3000", "http://localhost:3000"],
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https://([a-z0-9-]+\.)?vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

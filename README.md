@@ -21,6 +21,17 @@ node server.js
 
 Then open `http://127.0.0.1:3000` in a browser.
 
+For mobile testing with the Vercel frontend, expose the local vision service
+through Ngrok and paste the HTTPS URL into the app's Backend API URL field:
+
+```powershell
+ngrok http 8001
+```
+
+Keep the vision service running from `vision_service/` while the tunnel is
+active. The service accepts Vercel origins and the installed PWA opens directly
+to `/app.html`.
+
 Run the automated checks with:
 
 ```powershell

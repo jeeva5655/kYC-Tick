@@ -185,6 +185,9 @@ elements.form.addEventListener("submit", async (event) => {
     elements.progressText.textContent = "Running unified visual analysis (OCR, Forensics, Face)...";
     
     let backendUrl = document.getElementById("backendUrlInput").value.trim();
+    if (!backendUrl) {
+      throw new Error("Enter the public Ngrok URL for the local vision service.");
+    }
     if (backendUrl.endsWith("/")) backendUrl = backendUrl.slice(0, -1);
     const analyzeRes = await fetch(`${backendUrl}/api/v1/analyze-all`, {
       method: "POST",
@@ -333,6 +336,8 @@ if (urlInput) {
     const savedUrl = localStorage.getItem("backendApiUrl");
     if (savedUrl) {
         urlInput.value = savedUrl;
+  } else if (!['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+    urlInput.value = "";
     }
     urlInput.addEventListener("input", (e) => {
         localStorage.setItem("backendApiUrl", e.target.value.trim());
