@@ -468,3 +468,21 @@ input:not([type="checkbox"]):not([type="file"]), .document-select { border: 1px 
   .result-panel { margin-top: 1.25rem; }
 }
 @media (max-width: 480px) { h1 { white-space: normal; } }
+
+@media screen {
+  .triage-description { color: #1e293b; }
+  .triage-badge.no-high-risk-signal-detected { color: #17603d; border: 1px solid #b9d8c7; background: #e8f3ee; }
+  .triage-badge.manual-review { color: #8a5a12; border: 1px solid #e5c98e; background: #fff7e6; }
+  .axis-card { border-color: #e2e8f0; background: #fff; }
+  .axis-card.clear { border-left-color: #198754; }
+  .axis-card.review { border-left-color: #b7791f; }
+  .axis-card.retake { border-left-color: #52749d; }
+  .axis-card.not-assessed, .axis-card.unavailable { border-left-color: #94a3b8; }
+  .axis-card p { color: #64748b; }
+  .evidence-item { border-color: #e2e8f0; background: #fff; }
+  .evidence-item.pass { border-left-color: #198754; }
+  .evidence-item.fail, .evidence-item.review { border-left-color: #b7791f; }
+  .status-chip { color: #17603d; border: 1px solid #b9d8c7; background: #e8f3ee; }
+  .fail .status-chip { color: #8a5a12; border-color: #e5c98e; background: #fff7e6; }
+  .audit-section code { color: #334155; border: 1px solid #e2e8f0; background: #f8fafc; }
+}
