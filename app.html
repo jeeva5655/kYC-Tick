@@ -175,6 +175,13 @@
       <footer class="footer-note">Deep learning inference running locally · No uploads to cloud · Privacy first</footer>
 
     </main>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js');
+        });
+      }
+    </script>
     <script type="module" src="/app.js?v=5"></script>
   </body>
 </html>
