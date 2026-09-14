@@ -113,6 +113,10 @@ setTimeout(() => {
     }
 }, 3000);
 
+const step1 = document.getElementById("step-1");
+const step2 = document.getElementById("step-2");
+const step3 = document.getElementById("step-3");
+
 // Update canvas on scroll
 window.addEventListener('scroll', () => {  
   const scrollTop = html.scrollTop;
@@ -121,6 +125,28 @@ window.addEventListener('scroll', () => {
   
   drawFrame(scrollFraction);
   
+  // Scene 1 (Scroll 5% - 25%)
+  if (scrollFraction > 0.05 && scrollFraction < 0.25) {
+      step1.classList.add('visible');
+  } else {
+      step1.classList.remove('visible');
+  }
+  
+  // Scene 2 (Scroll 30% - 50%)
+  if (scrollFraction > 0.30 && scrollFraction < 0.50) {
+      step2.classList.add('visible');
+  } else {
+      step2.classList.remove('visible');
+  }
+  
+  // Scene 3 (Scroll 55% - 75%)
+  if (scrollFraction > 0.55 && scrollFraction < 0.75) {
+      step3.classList.add('visible');
+  } else {
+      step3.classList.remove('visible');
+  }
+
+  // Scene 4 (Scroll 85%+)
   if (scrollFraction > 0.85) {
       heroContent.classList.add('visible');
   } else {
