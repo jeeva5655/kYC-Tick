@@ -1,27 +1,25 @@
 # Identity Document Detection - Architecture & Data Flow
 
-This document details the complete end-to-end architecture of the **Document Integrity Demo**, which supports Global Passports as well as Indian domestic IDs (Aadhaar, PAN, Voter ID, Driving Licence). The system is strictly divided between a deterministic, privacy-aware Node.js gateway and a Python-based machine learning inference engine.
+This document details the complete end-to-end architecture of the **Document Integrity Demo**, which supports Global Passports as well as Indian domestic IDs (Aadhaar, PAN, Voter ID, Driving Licence). The system is strictly divided between a cloud-hosted Vercel frontend/gateway and a local Python-based machine learning inference engine exposed via Ngrok.
 
 ## 1. High-Level System Architecture
 
 ```mermaid
 graph TD
-    %% Frontend Layer
-    subgraph Frontend [Browser Client / Frontend]
-        UI[app.js UI & Dropzones<br/>Front, Back, Selfie]
-        State[Form State & Pre-validation]
-    end
-
-    %% Gateway Layer
-    subgraph Gateway [Node.js Gateway - Port 3000]
-        API_Upload[POST /api/analyze]
+    %% Cloud Frontend Layer
+    subgraph Vercel Cloud [Vercel Cloud Platform]
+        UI[PWA Frontend app.js<br/>Dynamic Ngrok URL Config]
+        API_Upload[Serverless Function<br/>api/analyze.js]
         Triage[screening.js Triage Engine]
         Privacy[Privacy Masking]
         Digest[HMAC Audit Digest]
     end
 
-    %% ML Vision Layer
-    subgraph VisionService [Python Vision Service - Port 8001]
+    %% Network Tunnel
+    Tunnel((Ngrok Secure Tunnel))
+
+    %% Local ML Vision Layer
+    subgraph Local Workstation [Local Python Vision Service - Port 8001]
         Orchestrator[module7_orchestrator.py - POST /api/v1/analyze-all]
         
         Classifier[module8_classifier.py]
@@ -36,18 +34,19 @@ graph TD
     end
 
     %% Flow Connections
-    UI -->|1. Multipart Form Data (Images)| API_Upload
-    API_Upload -->|2. Forward Images| Orchestrator
+    UI -->|1. FormData + Ngrok URL| API_Upload
+    API_Upload -->|2. Forward Images| Tunnel
+    Tunnel -->|3. Route Request| Orchestrator
     
-    Orchestrator -->|3a. dispatch| FullOCR
+    Orchestrator -->|4a. dispatch| FullOCR
     Orchestrator -->|3b. dispatch| Tamper
     Orchestrator -->|3c. dispatch| Face
     Orchestrator -->|3d. dispatch| AIDetect
     Orchestrator -->|3e. dispatch| QRVerify
     
-    FullOCR -->|4. Merged Front+Back OCR Text| Classifier
-    Classifier -->|5a. If Passport| OCR
-    Classifier -->|5b. If Domestic ID| IndianIDs
+    FullOCR -->|5. Merged Front+Back OCR Text| Classifier
+    Classifier -->|6a. If Passport| OCR
+    Classifier -->|6b. If Domestic ID| IndianIDs
     
     OCR -.-> Orchestrator
     IndianIDs -.-> Orchestrator
@@ -56,10 +55,11 @@ graph TD
     AIDetect -.-> Orchestrator
     QRVerify -.-> Orchestrator
     
-    Orchestrator -->|6. Unified JSON Results| Triage
-    Triage -->|7. Triage Engine & Rules| Privacy
-    Privacy -->|8. Apply HMAC & Masking| Digest
-    Digest -->|9. Triage Output + Digest| UI
+    Orchestrator -->|7. Unified JSON Results| Tunnel
+    Tunnel -->|8. Return to Cloud| Triage
+    Triage -->|9. Triage Engine & Rules| Privacy
+    Privacy -->|10. Apply HMAC & Masking| Digest
+    Digest -->|11. Triage Output + Digest| UI
 ```
 
 ---
@@ -73,17 +73,19 @@ sequenceDiagram
     autonumber
     actor User
     participant App as Browser (app.js)
-    participant Node as Node.js API (server.js)
-    participant Python as Python Orchestrator (module7)
-    participant ML as ML Models (ThreadPool)
+    participant Vercel as Vercel Serverless (api/analyze.js)
+    participant Ngrok as Ngrok Tunnel
+    participant Python as Local Orchestrator (module7)
+    participant ML as Local ML Models (ThreadPool)
     participant QR as Cryptography (module10)
     
-    User->>App: Drops Doc Front, Doc Back (Optional), & Selfie
+    User->>App: Drops Doc Front, Doc Back, Selfie & Sets Ngrok URL
     User->>App: Clicks "Run AI Screening"
     
-    %% Request to Node
-    App->>Node: POST /api/analyze<br/>(FormData: documentImage, document_back_image, liveImage)
-    Node->>Python: POST /api/v1/analyze-all<br/>(Forward images as raw bytes)
+    %% Request to Vercel
+    App->>Vercel: POST /api/analyze<br/>(FormData + dynamic backend URL)
+    Vercel->>Ngrok: POST https://[id].ngrok.app/api/v1/analyze-all
+    Ngrok->>Python: Route to localhost:8001
     
     %% Python internal dispatch - Phase 1
     activate Python
@@ -111,21 +113,22 @@ sequenceDiagram
     deactivate Python
     
     %% Python to Node
-    Python-->>Node: Return merged JSON (docType, IDs, PIN, ML signals, QR)
+    Python-->>Ngrok: Return merged JSON (docType, IDs, PIN, ML signals, QR)
+    Ngrok-->>Vercel: Return payload to Cloud
     
-    %% Node Triage
-    activate Node
-    note over Node: screening.js Triage Rules
-    Node->>Node: Weigh rules based on docType (MRZ vs Regex vs QR Signature)
-    Node->>Node: Calculate Score -> Decide "MANUAL_REVIEW" vs "REAL"
+    %% Vercel Triage
+    activate Vercel
+    note over Vercel: screening.js Triage Rules
+    Vercel->>Vercel: Weigh rules based on docType
+    Vercel->>Vercel: Calculate Score -> Decide "MANUAL_REVIEW" vs "REAL"
     
     %% Privacy & Crypto
-    Node->>Node: Privacy: Mask raw IDs (leave last 4 chars)
-    Node->>Node: Crypto: HMAC-SHA256(RawID + Verdict + Timestamp, secret)
-    deactivate Node
+    Vercel->>Vercel: Privacy: Mask raw IDs (leave last 4 chars)
+    Vercel->>Vercel: Crypto: HMAC-SHA256(RawID + Verdict + Timestamp)
+    deactivate Vercel
     
-    %% Node to App
-    Node-->>App: Return { triageResult, axes, details, auditDigest }
+    %% Vercel to App
+    Vercel-->>App: Return { triageResult, axes, details, auditDigest }
     
     App->>User: Render Intelligence Report UI
 ```
@@ -160,7 +163,7 @@ graph TD
 
 The architecture is explicitly designed to meet DPDP / GDPR / Aadhaar Act constraints regarding biometric handling:
 
-1. **Memory-Only Processing**: Images are buffered in RAM during the Node.js `multer` upload and `httpx` forward. No images are ever saved to disk.
-2. **Deterministic Triage Isolation**: The Node.js triage server never sees raw ML tensor data or image buffers during decision making—it strictly evaluates discrete output signals (e.g., `confidence: 0.82`, `signature_valid: True`).
-3. **Data Minimization (Masking)**: Aadhaar, PAN, Voter ID, and Driving Licence numbers are immediately masked by the Node server (e.g. `••••••••1234`). The raw ID is NEVER transmitted back to the browser or stored in plaintext.
-4. **Cryptographic Auditing (HMAC)**: Instead of logging PII for auditing, the system generates a **deterministic HMAC-SHA256 digest** using a secured environment secret. This allows investigators to correlate repeat usages of a forged ID across multiple transactions without ever exposing the raw plaintext ID to an outside observer.
+1. **Memory-Only Processing**: Images are buffered in RAM during the Vercel `fetch` and locally via `FastAPI`. No images are ever saved to disk in the cloud or locally.
+2. **Deterministic Triage Isolation**: The Vercel cloud environment never runs heavy ML processing; it strictly evaluates discrete output signals (e.g., `confidence: 0.82`, `signature_valid: True`) over a secure Ngrok tunnel.
+3. **Data Minimization (Masking)**: Aadhaar, PAN, Voter ID, and Driving Licence numbers are immediately masked by the Vercel Serverless Function (e.g. `••••••••1234`). The raw ID is NEVER transmitted back to the browser or stored in plaintext.
+4. **Cryptographic Auditing (HMAC)**: Instead of logging PII for auditing, the system generates a **deterministic HMAC-SHA256 digest** using a secure hash. This allows investigators to correlate repeat usages of a forged ID across multiple transactions without ever exposing the raw plaintext ID to an outside observer.
